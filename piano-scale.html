@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scale piano — DKMY ART</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .piano-page {
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+
+      .piano-page h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+
+      .piano-page .lead {
+        margin: 0 0 1.75rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1.25rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--text);
+      }
+
+      .controls select {
+        font: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid #2e2e32;
+        border-radius: 6px;
+        padding: 0.45rem 2rem 0.45rem 0.65rem;
+        min-width: 12rem;
+        cursor: pointer;
+      }
+
+      .controls select:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .scale-hint {
+        margin: 0 0 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .piano-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 42rem;
+        margin: 0 auto;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .piano-keys {
+        position: relative;
+        display: flex;
+        height: 11rem;
+        border-radius: 0 0 6px 6px;
+        overflow: visible;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      }
+
+      .key-white {
+        flex: 1 1 0;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+        border: 1px solid #2a2a2e;
+        border-right: none;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(180deg, #f5f3ef 0%, #e8e4dc 55%, #d4cfc4 100%);
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #3a3835;
+        transition: background 0.08s ease, transform 0.06s ease;
+      }
+
+      .piano-keys .key-white:last-child {
+        border-right: 1px solid #2a2a2e;
+      }
+
+      .key-white:hover {
+        background: linear-gradient(180deg, #fffefb 0%, #f0ebe3 55%, #ddd8ce 100%);
+      }
+
+      .key-white:active,
+      .key-white.is-active {
+        background: linear-gradient(180deg, #e0ddd6 0%, #d0ccc2 100%);
+        transform: translateY(1px);
+      }
+
+      .key-white.in-scale {
+        box-shadow: inset 0 -4px 0 0 var(--accent);
+      }
+
+      .key-white.in-scale .key-label {
+        color: #6b5a1a;
+      }
+
+      .key-black {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        width: 9%;
+        height: 58%;
+        border: 1px solid #0a0a0a;
+        border-radius: 0 0 3px 3px;
+        background: linear-gradient(180deg, #2a2a2e 0%, #121214 70%, #0a0a0c 100%);
+        cursor: pointer;
+        padding: 0;
+        padding-top: 0.35rem;
+        font-size: 0.55rem;
+        font-weight: 600;
+        color: #b8b4ac;
+        transition: background 0.08s ease, transform 0.06s ease;
+      }
+
+      .key-black:hover {
+        background: linear-gradient(180deg, #3a3a42 0%, #1a1a1e 70%, #101012 100%);
+      }
+
+      .key-black:active,
+      .key-black.is-active {
+        background: linear-gradient(180deg, #1a1a1e 0%, #0a0a0c 100%);
+        transform: translateY(1px);
+      }
+
+      .key-black.in-scale {
+        box-shadow: inset 0 -3px 0 0 var(--accent);
+      }
+
+      .key-black.in-scale .key-label {
+        color: var(--accent);
+      }
+
+      .key-label {
+        pointer-events: none;
+      }
+
+      /* Black key horizontal positions (% of piano width), centered between white pairs */
+      .kb-0 {
+        left: 7.5%;
+      }
+      .kb-1 {
+        left: 21.5%;
+      }
+      .kb-2 {
+        left: 50%;
+      }
+      .kb-3 {
+        left: 64.5%;
+      }
+      .kb-4 {
+        left: 78.5%;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="logo">DKMY ART</h1>
+      <p class="tagline">Scale piano</p>
+    </header>
+
+    <main class="piano-page">
+      <h1>Mini piano &amp; scales</h1>
+      <p class="lead">
+        Choose a scale. Keys in the scale are marked along the bottom; click or tap keys to play.
+      </p>
+
+      <div class="controls">
+        <label for="scale-select">
+          <span>Scale</span>
+          <select id="scale-select" aria-describedby="scale-hint"></select>
+        </label>
+      </div>
+      <p id="scale-hint" class="scale-hint" aria-live="polite"></p>
+
+      <div class="piano-wrap">
+        <div class="piano-keys" id="piano-keys" role="group" aria-label="One octave piano, C4 to B4"></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; <span id="year"></span> DKMY ART</p>
+    </footer>
+
+    <script>
+      (function () {
+        const NOTE_NAMES = [
+          "C",
+          "C♯",
+          "D",
+          "D♯",
+          "E",
+          "F",
+          "F♯",
+          "G",
+          "G♯",
+          "A",
+          "A♯",
+          "B",
+        ];
+        const ROOT_NAMES = [
+          "C",
+          "C♯",
+          "D",
+          "D♯",
+          "E",
+          "F",
+          "F♯",
+          "G",
+          "G♯",
+          "A",
+          "A♯",
+          "B",
+        ];
+
+        /** Semitone offsets from root for each scale type (pitch classes within octave). */
+        const SCALE_FORMULAS = {
+          major: [0, 2, 4, 5, 7, 9, 11],
+          naturalMinor: [0, 2, 3, 5, 7, 8, 10],
+          harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
+          melodicMinor: [0, 2, 3, 5, 7, 9, 11],
+          majorPentatonic: [0, 2, 4, 7, 9],
+          minorPentatonic: [0, 3, 5, 7, 10],
+          blues: [0, 3, 5, 6, 7, 10],
+          dorian: [0, 2, 3, 5, 7, 9, 10],
+          mixolydian: [0, 2, 4, 5, 7, 9, 10],
+          lydian: [0, 2, 4, 6, 7, 9, 11],
+          phrygian: [0, 1, 3, 5, 7, 8, 10],
+          locrian: [0, 1, 3, 5, 6, 8, 10],
+        };
+
+        const SCALE_LABELS = {
+          major: "Major",
+          naturalMinor: "Natural minor",
+          harmonicMinor: "Harmonic minor",
+          melodicMinor: "Melodic minor",
+          majorPentatonic: "Major pentatonic",
+          minorPentatonic: "Minor pentatonic",
+          blues: "Blues",
+          dorian: "Dorian",
+          mixolydian: "Mixolydian",
+          lydian: "Lydian",
+          phrygian: "Phrygian",
+          locrian: "Locrian",
+        };
+
+        const BASE_OCTAVE = 4;
+        const MIDI_C4 = 60;
+
+        /** White keys in one octave C–B: indices into chromatic order for white keys only */
+        const WHITE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
+        /** Black keys: semitone offset from C of octave */
+        const BLACK_OFFSETS = [1, 3, 6, 8, 10];
+
+        function parseScaleId(id) {
+          const [rootStr, type] = id.split(":");
+          const root = parseInt(rootStr, 10);
+          return { root, type };
+        }
+
+        function pitchClassesForScale(root, type) {
+          const intervals = SCALE_FORMULAS[type];
+          if (!intervals) return new Set();
+          return new Set(intervals.map((i) => (root + i) % 12));
+        }
+
+        let audioCtx = null;
+
+        function getAudioContext() {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          return audioCtx;
+        }
+
+        function playMidiNote(midi, durationSec) {
+          const ctx = getAudioContext();
+          const t0 = ctx.currentTime;
+          const freq = 440 * Math.pow(2, (midi - 69) / 12);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, t0);
+          gain.gain.setValueAtTime(0, t0);
+          gain.gain.linearRampToValueAtTime(0.18, t0 + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, t0 + durationSec);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t0);
+          osc.stop(t0 + durationSec + 0.05);
+        }
+
+        function buildScaleOptions(selectEl) {
+          const frag = document.createDocumentFragment();
+          for (let r = 0; r < 12; r++) {
+            const rootName = ROOT_NAMES[r];
+            for (const type of Object.keys(SCALE_FORMULAS)) {
+              const opt = document.createElement("option");
+              const id = r + ":" + type;
+              opt.value = id;
+              opt.textContent = rootName + " " + SCALE_LABELS[type];
+              frag.appendChild(opt);
+            }
+          }
+          selectEl.appendChild(frag);
+          selectEl.value = "0:major";
+        }
+
+        function buildPiano(container) {
+          container.innerHTML = "";
+          const whiteKeys = [];
+          const blackKeys = [];
+
+          for (let i = 0; i < WHITE_OFFSETS.length; i++) {
+            const offset = WHITE_OFFSETS[i];
+            const midi = MIDI_C4 + offset;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "key-white";
+            btn.dataset.midi = String(midi);
+            btn.dataset.pitchClass = String(offset % 12);
+            const name = NOTE_NAMES[offset];
+            btn.innerHTML =
+              '<span class="key-label" aria-hidden="true">' + name + "</span>";
+            btn.setAttribute("aria-label", name + " " + BASE_OCTAVE);
+            whiteKeys.push(btn);
+            container.appendChild(btn);
+          }
+
+          for (let i = 0; i < BLACK_OFFSETS.length; i++) {
+            const offset = BLACK_OFFSETS[i];
+            const midi = MIDI_C4 + offset;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "key-black kb-" + i;
+            btn.dataset.midi = String(midi);
+            btn.dataset.pitchClass = String(offset % 12);
+            const name = NOTE_NAMES[offset];
+            btn.innerHTML =
+              '<span class="key-label" aria-hidden="true">' + name + "</span>";
+            btn.setAttribute("aria-label", name + " " + BASE_OCTAVE);
+            blackKeys.push(btn);
+            container.appendChild(btn);
+          }
+
+          return { whiteKeys, blackKeys };
+        }
+
+        function applyScaleHighlight(keys, root, type) {
+          const pcs = pitchClassesForScale(root, type);
+          const all = [...keys.whiteKeys, ...keys.blackKeys];
+          for (const btn of all) {
+            const pc = Number(btn.dataset.pitchClass, 10);
+            const on = pcs.has(pc);
+            btn.classList.toggle("in-scale", on);
+          }
+        }
+
+        function updateHint(el, root, type) {
+          const rootName = ROOT_NAMES[root];
+          const label = SCALE_LABELS[type];
+          const intervals = SCALE_FORMULAS[type];
+          const notes = intervals
+            .map((i) => NOTE_NAMES[(root + i) % 12])
+            .join(" · ");
+          el.textContent =
+            rootName +
+            " " +
+            label +
+            ": " +
+            notes;
+        }
+
+        function bindPlay(keys) {
+          const all = [...keys.whiteKeys, ...keys.blackKeys];
+          const down = (btn) => {
+            btn.classList.add("is-active");
+            const midi = Number(btn.dataset.midi, 10);
+            playMidiNote(midi, 0.45);
+          };
+          const up = (btn) => btn.classList.remove("is-active");
+
+          for (const btn of all) {
+            btn.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              down(btn);
+            });
+            btn.addEventListener("mouseup", () => up(btn));
+            btn.addEventListener("mouseleave", () => up(btn));
+            btn.addEventListener("touchstart", (e) => {
+              e.preventDefault();
+              down(btn);
+            }, { passive: false });
+            btn.addEventListener("touchend", () => up(btn));
+            btn.addEventListener("touchcancel", () => up(btn));
+          }
+        }
+
+        const select = document.getElementById("scale-select");
+        const hint = document.getElementById("scale-hint");
+        const pianoEl = document.getElementById("piano-keys");
+
+        buildScaleOptions(select);
+        const keys = buildPiano(pianoEl);
+        bindPlay(keys);
+
+        function refresh() {
+          const { root, type } = parseScaleId(select.value);
+          applyScaleHighlight(keys, root, type);
+          updateHint(hint, root, type);
+        }
+
+        select.addEventListener("change", refresh);
+        refresh();
+
+        document.addEventListener(
+          "click",
+          () => {
+            getAudioContext().resume();
+          },
+          { once: true }
+        );
+
+        const yearEl = document.getElementById("year");
+        if (yearEl) {
+          yearEl.textContent = String(new Date().getFullYear());
+        }
+      })();
+    </script>
+  </body>
+</html>
