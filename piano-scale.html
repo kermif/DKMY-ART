@@ -64,6 +64,24 @@
         font-variant-numeric: tabular-nums;
       }
 
+      .keyboard-hint {
+        margin: 0 0 1.25rem;
+        font-size: 0.8125rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .keyboard-hint kbd {
+        display: inline-block;
+        padding: 0.1em 0.4em;
+        font-size: 0.85em;
+        font-family: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid #2e2e32;
+        border-radius: 4px;
+      }
+
       .piano-wrap {
         position: relative;
         width: 100%;
@@ -205,7 +223,13 @@
     <main class="piano-page">
       <h1>Mini piano &amp; scales</h1>
       <p class="lead">
-        Choose a scale. Keys in the scale are marked along the bottom; click or tap keys to play.
+        Choose a scale. Keys in the scale are marked along the bottom; click, tap, or use the
+        computer keyboard to play.
+      </p>
+      <p class="keyboard-hint" id="keyboard-hint">
+        <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd> <kbd>H</kbd> <kbd>J</kbd>
+        <kbd>K</kbd> → C–B &nbsp;·&nbsp; <kbd>L</kbd> → C one octave up &nbsp;·&nbsp;
+        <kbd>Insert</kbd> → C♯
       </p>
 
       <div class="controls">
@@ -393,7 +417,7 @@
           const pcs = pitchClassesForScale(root, type);
           const all = [...keys.whiteKeys, ...keys.blackKeys];
           for (const btn of all) {
-            const pc = Number(btn.dataset.pitchClass, 10);
+            const pc = parseInt(btn.dataset.pitchClass, 10);
             const on = pcs.has(pc);
             btn.classList.toggle("in-scale", on);
           }
@@ -414,14 +438,55 @@
             notes;
         }
 
+        /** Physical key code → MIDI note (QWERTY row + Insert). L = C5; Insert = C♯4. */
+        const CODE_TO_MIDI = {
+          KeyS: 60,
+          KeyD: 62,
+          KeyF: 64,
+          KeyG: 65,
+          KeyH: 67,
+          KeyJ: 69,
+          KeyK: 71,
+          KeyL: 72,
+          Insert: 61,
+        };
+
+        function isFormFieldTarget(el) {
+          if (!el || !el.tagName) return false;
+          const t = el.tagName;
+          return (
+            t === "INPUT" ||
+            t === "TEXTAREA" ||
+            t === "SELECT" ||
+            el.isContentEditable
+          );
+        }
+
         function bindPlay(keys) {
           const all = [...keys.whiteKeys, ...keys.blackKeys];
-          const down = (btn) => {
-            btn.classList.add("is-active");
-            const midi = Number(btn.dataset.midi, 10);
+          const midiToBtn = new Map();
+          for (const btn of all) {
+            midiToBtn.set(parseInt(btn.dataset.midi, 10), btn);
+          }
+
+          function midiDown(midi) {
             playMidiNote(midi, 0.45);
-          };
-          const up = (btn) => btn.classList.remove("is-active");
+            const btn = midiToBtn.get(midi);
+            if (btn) btn.classList.add("is-active");
+          }
+
+          function midiUp(midi) {
+            const btn = midiToBtn.get(midi);
+            if (btn) btn.classList.remove("is-active");
+          }
+
+          function down(btn) {
+            midiDown(parseInt(btn.dataset.midi, 10));
+          }
+
+          function up(btn) {
+            midiUp(parseInt(btn.dataset.midi, 10));
+          }
 
           for (const btn of all) {
             btn.addEventListener("mousedown", (e) => {
@@ -430,13 +495,51 @@
             });
             btn.addEventListener("mouseup", () => up(btn));
             btn.addEventListener("mouseleave", () => up(btn));
-            btn.addEventListener("touchstart", (e) => {
-              e.preventDefault();
-              down(btn);
-            }, { passive: false });
+            btn.addEventListener(
+              "touchstart",
+              (e) => {
+                e.preventDefault();
+                down(btn);
+              },
+              { passive: false }
+            );
             btn.addEventListener("touchend", () => up(btn));
             btn.addEventListener("touchcancel", () => up(btn));
           }
+
+          const pressedCodes = new Set();
+
+          function releaseAllKeyboard() {
+            for (const code of pressedCodes) {
+              const midi = CODE_TO_MIDI[code];
+              if (midi !== undefined) {
+                midiUp(midi);
+              }
+            }
+            pressedCodes.clear();
+          }
+
+          window.addEventListener("keydown", (e) => {
+            if (e.repeat) return;
+            if (isFormFieldTarget(e.target)) return;
+            const midi = CODE_TO_MIDI[e.code];
+            if (midi === undefined) return;
+            e.preventDefault();
+            if (pressedCodes.has(e.code)) return;
+            pressedCodes.add(e.code);
+            getAudioContext().resume();
+            midiDown(midi);
+          });
+
+          window.addEventListener("keyup", (e) => {
+            const midi = CODE_TO_MIDI[e.code];
+            if (midi === undefined) return;
+            if (!pressedCodes.has(e.code)) return;
+            pressedCodes.delete(e.code);
+            midiUp(midi);
+          });
+
+          window.addEventListener("blur", releaseAllKeyboard);
         }
 
         const select = document.getElementById("scale-select");
