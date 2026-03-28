@@ -223,13 +223,14 @@
     <main class="piano-page">
       <h1>Mini piano &amp; scales</h1>
       <p class="lead">
-        Choose a scale. Keys in the scale are marked along the bottom; click, tap, or use the
+        Choose a scale. The left white key is always the tonic; the octave runs chromatically from
+        there so the layout matches that key. Scale tones are marked; click, tap, or use the
         computer keyboard to play.
       </p>
       <p class="keyboard-hint" id="keyboard-hint">
         <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd> <kbd>H</kbd> <kbd>J</kbd>
-        <kbd>K</kbd> → C–B &nbsp;·&nbsp; <kbd>L</kbd> → C one octave up &nbsp;·&nbsp;
-        <kbd>Insert</kbd> → C♯
+        <kbd>K</kbd> → tonic through leading tone &nbsp;·&nbsp; <kbd>L</kbd> → tonic, next octave
+        &nbsp;·&nbsp; <kbd>Insert</kbd> → semitone above tonic
       </p>
 
       <div class="controls">
@@ -241,7 +242,12 @@
       <p id="scale-hint" class="scale-hint" aria-live="polite"></p>
 
       <div class="piano-wrap">
-        <div class="piano-keys" id="piano-keys" role="group" aria-label="One octave piano, C4 to B4"></div>
+        <div
+          class="piano-keys"
+          id="piano-keys"
+          role="group"
+          aria-label="One chromatic octave from the scale tonic"
+        ></div>
       </div>
     </main>
 
@@ -265,70 +271,48 @@
           "A♯",
           "B",
         ];
-        const ROOT_NAMES = [
-          "C",
-          "C♯",
-          "D",
-          "D♯",
-          "E",
-          "F",
-          "F♯",
-          "G",
-          "G♯",
-          "A",
-          "A♯",
-          "B",
+
+        /** Semitone steps from tonic along one chromatic octave (keyboard layout). */
+        const MAJOR_CHROMATIC = [0, 2, 4, 5, 7, 9, 11];
+        const NATURAL_MINOR_CHROMATIC = [0, 2, 3, 5, 7, 8, 10];
+
+        /**
+         * Only these scales. value → option id; root = pitch class 0–11; mode sets which
+         * chromatic steps (from tonic) count as “in scale” for the gold bar.
+         */
+        const SCALES = [
+          { value: "d-major", label: "D major", root: 2, mode: "major" },
+          { value: "a-minor", label: "A minor", root: 9, mode: "minor" },
+          { value: "e-minor", label: "E minor", root: 4, mode: "minor" },
+          { value: "f-major", label: "F major", root: 5, mode: "major" },
+          { value: "g-major", label: "G major", root: 7, mode: "major" },
+          { value: "b-minor", label: "B minor", root: 11, mode: "minor" },
+          { value: "c-minor", label: "C minor", root: 0, mode: "minor" },
         ];
 
-        /** Semitone offsets from root for each scale type (pitch classes within octave). */
-        const SCALE_FORMULAS = {
-          major: [0, 2, 4, 5, 7, 9, 11],
-          naturalMinor: [0, 2, 3, 5, 7, 8, 10],
-          harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
-          melodicMinor: [0, 2, 3, 5, 7, 9, 11],
-          majorPentatonic: [0, 2, 4, 7, 9],
-          minorPentatonic: [0, 3, 5, 7, 10],
-          blues: [0, 3, 5, 6, 7, 10],
-          dorian: [0, 2, 3, 5, 7, 9, 10],
-          mixolydian: [0, 2, 4, 5, 7, 9, 10],
-          lydian: [0, 2, 4, 6, 7, 9, 11],
-          phrygian: [0, 1, 3, 5, 7, 8, 10],
-          locrian: [0, 1, 3, 5, 6, 8, 10],
-        };
-
-        const SCALE_LABELS = {
-          major: "Major",
-          naturalMinor: "Natural minor",
-          harmonicMinor: "Harmonic minor",
-          melodicMinor: "Melodic minor",
-          majorPentatonic: "Major pentatonic",
-          minorPentatonic: "Minor pentatonic",
-          blues: "Blues",
-          dorian: "Dorian",
-          mixolydian: "Mixolydian",
-          lydian: "Lydian",
-          phrygian: "Phrygian",
-          locrian: "Locrian",
-        };
-
-        const BASE_OCTAVE = 4;
         const MIDI_C4 = 60;
 
-        /** White keys in one octave C–B: indices into chromatic order for white keys only */
+        /** White keys: chromatic step from tonic (0 = leftmost white). */
         const WHITE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
-        /** Black keys: semitone offset from C of octave */
+        /** Black keys: chromatic step from tonic. */
         const BLACK_OFFSETS = [1, 3, 6, 8, 10];
 
-        function parseScaleId(id) {
-          const [rootStr, type] = id.split(":");
-          const root = parseInt(rootStr, 10);
-          return { root, type };
+        function getScaleByValue(value) {
+          return SCALES.find((s) => s.value === value) || SCALES[0];
         }
 
-        function pitchClassesForScale(root, type) {
-          const intervals = SCALE_FORMULAS[type];
-          if (!intervals) return new Set();
-          return new Set(intervals.map((i) => (root + i) % 12));
+        function chromaticStepsInScale(mode) {
+          return mode === "major" ? MAJOR_CHROMATIC : NATURAL_MINOR_CHROMATIC;
+        }
+
+        function rootMidiForScale(root) {
+          return MIDI_C4 + root;
+        }
+
+        function midiToLabel(midi) {
+          const pc = ((midi % 12) + 12) % 12;
+          const octave = Math.floor(midi / 12) - 1;
+          return NOTE_NAMES[pc] + " " + octave;
         }
 
         let audioCtx = null;
@@ -359,18 +343,15 @@
 
         function buildScaleOptions(selectEl) {
           const frag = document.createDocumentFragment();
-          for (let r = 0; r < 12; r++) {
-            const rootName = ROOT_NAMES[r];
-            for (const type of Object.keys(SCALE_FORMULAS)) {
-              const opt = document.createElement("option");
-              const id = r + ":" + type;
-              opt.value = id;
-              opt.textContent = rootName + " " + SCALE_LABELS[type];
-              frag.appendChild(opt);
-            }
+          for (let i = 0; i < SCALES.length; i++) {
+            const s = SCALES[i];
+            const opt = document.createElement("option");
+            opt.value = s.value;
+            opt.textContent = s.label;
+            frag.appendChild(opt);
           }
           selectEl.appendChild(frag);
-          selectEl.value = "0:major";
+          selectEl.value = SCALES[0].value;
         }
 
         function buildPiano(container) {
@@ -379,33 +360,23 @@
           const blackKeys = [];
 
           for (let i = 0; i < WHITE_OFFSETS.length; i++) {
-            const offset = WHITE_OFFSETS[i];
-            const midi = MIDI_C4 + offset;
+            const chromatic = WHITE_OFFSETS[i];
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "key-white";
-            btn.dataset.midi = String(midi);
-            btn.dataset.pitchClass = String(offset % 12);
-            const name = NOTE_NAMES[offset];
-            btn.innerHTML =
-              '<span class="key-label" aria-hidden="true">' + name + "</span>";
-            btn.setAttribute("aria-label", name + " " + BASE_OCTAVE);
+            btn.dataset.chromatic = String(chromatic);
+            btn.innerHTML = '<span class="key-label" aria-hidden="true"></span>';
             whiteKeys.push(btn);
             container.appendChild(btn);
           }
 
           for (let i = 0; i < BLACK_OFFSETS.length; i++) {
-            const offset = BLACK_OFFSETS[i];
-            const midi = MIDI_C4 + offset;
+            const chromatic = BLACK_OFFSETS[i];
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "key-black kb-" + i;
-            btn.dataset.midi = String(midi);
-            btn.dataset.pitchClass = String(offset % 12);
-            const name = NOTE_NAMES[offset];
-            btn.innerHTML =
-              '<span class="key-label" aria-hidden="true">' + name + "</span>";
-            btn.setAttribute("aria-label", name + " " + BASE_OCTAVE);
+            btn.dataset.chromatic = String(chromatic);
+            btn.innerHTML = '<span class="key-label" aria-hidden="true"></span>';
             blackKeys.push(btn);
             container.appendChild(btn);
           }
@@ -413,42 +384,68 @@
           return { whiteKeys, blackKeys };
         }
 
-        function applyScaleHighlight(keys, root, type) {
-          const pcs = pitchClassesForScale(root, type);
+        function applyKeyLayout(keys, scale) {
+          const rootMidi = rootMidiForScale(scale.root);
+          const applyRow = function (btnList, offsets) {
+            for (let i = 0; i < btnList.length; i++) {
+              const chromatic = offsets[i];
+              const midi = rootMidi + chromatic;
+              const btn = btnList[i];
+              btn.dataset.midi = String(midi);
+              btn.dataset.chromatic = String(chromatic);
+              const pc = ((midi % 12) + 12) % 12;
+              const label = btn.querySelector(".key-label");
+              if (label) {
+                label.textContent = NOTE_NAMES[pc];
+              }
+              btn.setAttribute("aria-label", midiToLabel(midi));
+            }
+          };
+          applyRow(keys.whiteKeys, WHITE_OFFSETS);
+          applyRow(keys.blackKeys, BLACK_OFFSETS);
+        }
+
+        function applyScaleHighlight(keys, scale) {
+          const steps = new Set(chromaticStepsInScale(scale.mode));
           const all = [...keys.whiteKeys, ...keys.blackKeys];
-          for (const btn of all) {
-            const pc = parseInt(btn.dataset.pitchClass, 10);
-            const on = pcs.has(pc);
-            btn.classList.toggle("in-scale", on);
+          for (let i = 0; i < all.length; i++) {
+            const btn = all[i];
+            const p = parseInt(btn.dataset.chromatic, 10);
+            btn.classList.toggle("in-scale", steps.has(p));
           }
         }
 
-        function updateHint(el, root, type) {
-          const rootName = ROOT_NAMES[root];
-          const label = SCALE_LABELS[type];
-          const intervals = SCALE_FORMULAS[type];
-          const notes = intervals
-            .map((i) => NOTE_NAMES[(root + i) % 12])
+        function updateHint(el, scale) {
+          const steps = chromaticStepsInScale(scale.mode);
+          const notes = steps
+            .map(function (step) {
+              return NOTE_NAMES[(scale.root + step) % 12];
+            })
             .join(" · ");
           el.textContent =
-            rootName +
-            " " +
-            label +
-            ": " +
+            scale.label +
+            " — left white key is tonic; octave runs chromatically from there: " +
             notes;
         }
 
-        /** Physical key code → MIDI note (QWERTY row + Insert). L = C5; Insert = C♯4. */
-        const CODE_TO_MIDI = {
-          KeyS: 60,
-          KeyD: 62,
-          KeyF: 64,
-          KeyG: 65,
-          KeyH: 67,
-          KeyJ: 69,
-          KeyK: 71,
-          KeyL: 72,
-          Insert: 61,
+        /**
+         * Physical key → chromatic step from tonic (same as piano layout).
+         * L = next octave tonic (+12 semitones).
+         */
+        const CODE_TO_CHROMATIC = {
+          KeyS: 0,
+          KeyD: 2,
+          KeyF: 4,
+          KeyG: 5,
+          KeyH: 7,
+          KeyJ: 9,
+          KeyK: 11,
+          KeyL: 12,
+          Insert: 1,
+        };
+
+        const state = {
+          rootMidi: rootMidiForScale(SCALES[0].root),
         };
 
         function isFormFieldTarget(el) {
@@ -465,9 +462,16 @@
         function bindPlay(keys) {
           const all = [...keys.whiteKeys, ...keys.blackKeys];
           const midiToBtn = new Map();
-          for (const btn of all) {
-            midiToBtn.set(parseInt(btn.dataset.midi, 10), btn);
+
+          function rebuildMidiMap() {
+            midiToBtn.clear();
+            for (let i = 0; i < all.length; i++) {
+              const btn = all[i];
+              midiToBtn.set(parseInt(btn.dataset.midi, 10), btn);
+            }
           }
+
+          rebuildMidiMap();
 
           function midiDown(midi) {
             playMidiNote(midi, 0.45);
@@ -488,7 +492,8 @@
             midiUp(parseInt(btn.dataset.midi, 10));
           }
 
-          for (const btn of all) {
+          for (let i = 0; i < all.length; i++) {
+            const btn = all[i];
             btn.addEventListener("mousedown", (e) => {
               e.preventDefault();
               down(btn);
@@ -507,39 +512,42 @@
             btn.addEventListener("touchcancel", () => up(btn));
           }
 
-          const pressedCodes = new Set();
+          const pressedKeys = new Map();
+
+          function midiForChromaticStep(step) {
+            return state.rootMidi + step;
+          }
 
           function releaseAllKeyboard() {
-            for (const code of pressedCodes) {
-              const midi = CODE_TO_MIDI[code];
-              if (midi !== undefined) {
-                midiUp(midi);
-              }
+            for (const midi of pressedKeys.values()) {
+              midiUp(midi);
             }
-            pressedCodes.clear();
+            pressedKeys.clear();
           }
 
           window.addEventListener("keydown", (e) => {
             if (e.repeat) return;
             if (isFormFieldTarget(e.target)) return;
-            const midi = CODE_TO_MIDI[e.code];
-            if (midi === undefined) return;
+            const step = CODE_TO_CHROMATIC[e.code];
+            if (step === undefined) return;
             e.preventDefault();
-            if (pressedCodes.has(e.code)) return;
-            pressedCodes.add(e.code);
+            if (pressedKeys.has(e.code)) return;
+            const midi = midiForChromaticStep(step);
+            pressedKeys.set(e.code, midi);
             getAudioContext().resume();
             midiDown(midi);
           });
 
           window.addEventListener("keyup", (e) => {
-            const midi = CODE_TO_MIDI[e.code];
-            if (midi === undefined) return;
-            if (!pressedCodes.has(e.code)) return;
-            pressedCodes.delete(e.code);
-            midiUp(midi);
+            const midiHeld = pressedKeys.get(e.code);
+            if (midiHeld === undefined) return;
+            pressedKeys.delete(e.code);
+            midiUp(midiHeld);
           });
 
           window.addEventListener("blur", releaseAllKeyboard);
+
+          return { rebuildMidiMap };
         }
 
         const select = document.getElementById("scale-select");
@@ -548,12 +556,15 @@
 
         buildScaleOptions(select);
         const keys = buildPiano(pianoEl);
-        bindPlay(keys);
+        const playCtl = bindPlay(keys);
 
         function refresh() {
-          const { root, type } = parseScaleId(select.value);
-          applyScaleHighlight(keys, root, type);
-          updateHint(hint, root, type);
+          const scale = getScaleByValue(select.value);
+          state.rootMidi = rootMidiForScale(scale.root);
+          applyKeyLayout(keys, scale);
+          playCtl.rebuildMidiMap();
+          applyScaleHighlight(keys, scale);
+          updateHint(hint, scale);
         }
 
         select.addEventListener("change", refresh);
