@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scale piano — DKMY ART</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+    :root {
+      /* LIGHT THEME (default) — matches the quiz */
+      --bg: #F6ECD9; /* warm cream */
+  --surface: #dabae9;
+  --surface2: #dabae9;
+      --text: #6E3E99; /* deep purple */
+      --muted: #B9A6D1; /* soft lavender */
+      --accent: #C19AFB;
+      --brand-text: #8A6FD1;
+      --radius: 14px;
+      --font-ui: "DM Sans", system-ui, sans-serif;
+
+      /* hero/panel/button variables */
+      --brand-bar-gradient: linear-gradient(90deg,#C7E1FF,#F6C9DF);
+      --title-color: #6E3E99;
+      --subtitle-color: #B7A1D6;
+  --panel-color: #dabae9; /* updated box color */
+      --panel-radius: 56px;
+      --btn-bg: linear-gradient(180deg,#F8D6B7,#F4C9A8);
+      --btn-text: #E07A4C;
+      --btn-shadow: rgba(224,122,76,0.14);
+      --panel-inset-shadow: rgba(0,0,0,0.06);
+    }
+
+    .dark-mode {
+      --bg: radial-gradient(1200px 800px at 20% -10%, #1a2340 0%, transparent 55%), radial-gradient(900px 600px at 100% 50%, #251838 0%, transparent 50%), #0f1219;
+      --surface: #0f1117;
+      --surface2: #151724;
+      --text: #e8eaf0;
+      --muted: #8b92a8;
+      --accent: #7c9cff;
+      --brand-bar-gradient: linear-gradient(90deg,#6f63a8,#7b63a8);
+      --brand-text: #6b8cde;
+      --title-color: #ffdfe9;
+      --subtitle-color: #c6bfe0;
+      --panel-color: #8f80b2;
+      --btn-bg: linear-gradient(180deg,#dbeeff,#c7e0ff);
+      --btn-text: #3b3b66;
+      --btn-shadow: rgba(0,0,0,0.06);
+      --panel-inset-shadow: rgba(0,0,0,0.06);
+    }
+
+  .dark-mode .brand-bar #home-btn { color: #6b8cde; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: none;
+      width: 100%;
+      margin: 0;
+      padding: 28px 28px 48px;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: left;
+      margin-bottom: 0.5rem;
+      padding-left: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: transparent;
+      padding-top: 8px;
+    }
+
+    .theme-toggle {
+      border-radius: 12px;
+      padding: 0.55rem 0.9rem;
+      background: rgba(255,255,255,0.7);
+      color: var(--title-color);
+      cursor: pointer;
+      border: 2px solid rgba(0,0,0,0.06);
+      display:inline-flex; align-items:center; justify-content:center;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+      font-size: 1.25rem; /* larger icon */
+      line-height: 1;
+    }
+    .theme-toggle:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+    .theme-toggle:focus { outline: 3px solid rgba(124,156,255,0.18); outline-offset: 3px; }
+    .sound-btn.active {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .brand-bar { display:flex; align-items:center; justify-content:space-between; background: var(--brand-bar-gradient); padding: 10px 18px; border-radius: 6px; margin-bottom: 18px; color: var(--brand-text); font-weight:700; letter-spacing:0.06em; }
+    .brand-bar .brand-name { font-family: 'Fredoka One', system-ui, sans-serif; font-size:1.05rem; color:var(--brand-text) }
+    .brand-bar .brand-right { opacity:0.95; }
+
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 1rem; padding-bottom: 28px; }
+
+      .piano-page {
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+
+      .piano-page h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+
+      .piano-page .lead {
+        margin: 0 0 1.75rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1.25rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--text);
+      }
+
+      .controls select {
+        font: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        padding: 0.45rem 2rem 0.45rem 0.65rem;
+        min-width: 12rem;
+        cursor: pointer;
+      }
+
+      .controls select:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .scale-hint {
+        margin: 0 0 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .keyboard-hint {
+        margin: 0 0 1.25rem;
+        font-size: 0.8125rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .keyboard-hint kbd {
+        display: inline-block;
+        padding: 0.1em 0.4em;
+        font-size: 0.85em;
+        font-family: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 4px;
+      }
+
+      .piano-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 42rem;
+        margin: 0 auto;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .piano-keys {
+        position: relative;
+        display: flex;
+        height: 11rem;
+        border-radius: 0 0 6px 6px;
+        overflow: visible;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      }
+
+      .key-white {
+        flex: 1 1 0;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(180deg, #f5f3ef 0%, #e8e4dc 55%, #d4cfc4 100%);
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #3a3835;
+        transition: background 0.08s ease, transform 0.06s ease;
+      }
+
+      .piano-keys .key-white:last-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .key-white:hover {
+        background: linear-gradient(180deg, #fffefb 0%, #f0ebe3 55%, #ddd8ce 100%);
+      }
+
+      .key-white:active,
+      .key-white.is-active {
+        background: linear-gradient(180deg, #e0ddd6 0%, #d0ccc2 100%);
+        transform: translateY(1px);
+      }
+
+      .key-white.in-scale {
+        box-shadow: inset 0 -4px 0 0 var(--accent);
+      }
+
+      .key-white.in-scale .key-label {
+        color: #6b5a1a;
+      }
+
+      .key-black {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        width: 9%;
+        height: 58%;
+        border: 1px solid #0a0a0a;
+        border-radius: 0 0 3px 3px;
+        background: linear-gradient(180deg, #2a2a2e 0%, #121214 70%, #0a0a0c 100%);
+        cursor: pointer;
+        padding: 0;
+        padding-top: 0.35rem;
+        font-size: 0.55rem;
+        font-weight: 600;
+        color: #b8b4ac;
+        transition: background 0.08s ease, transform 0.06s ease;
+      }
+
+      .key-black:hover {
+        background: linear-gradient(180deg, #3a3a42 0%, #1a1a1e 70%, #101012 100%);
+      }
+
+      .key-black:active,
+      .key-black.is-active {
+        background: linear-gradient(180deg, #1a1a1e 0%, #0a0a0c 100%);
+        transform: translateY(1px);
+      }
+
+      .key-black.in-scale {
+        box-shadow: inset 0 -3px 0 0 var(--accent);
+      }
+
+      .key-black.in-scale .key-label {
+        color: var(--accent);
+      }
+
+      .key-label {
+        pointer-events: none;
+      }
+
+      /* Black key horizontal positions (% of piano width), centered between white pairs */
+      .kb-0 {
+        left: 7.5%;
+      }
+      .kb-1 {
+        left: 21.5%;
+      }
+      .kb-2 {
+        left: 50%;
+      }
+      .kb-3 {
+        left: 64.5%;
+      }
+      .kb-4 {
+        left: 78.5%;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .drum-section {
+        margin-top: 3rem;
+        text-align: center;
+      }
+
+      .drum-kit {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        max-width: 500px;
+        margin: 2rem auto;
+      }
+
+      .drum {
+        padding: 2rem 1rem;
+        border-radius: 50%;
+        background: var(--panel-color);
+        border: 3px solid var(--text);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.1s ease;
+        font-size: 1.1rem;
+        color: var(--text);
+        outline: none;
+        box-shadow: 0 4px 0px var(--text);
+      }
+
+      .drum:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px var(--text);
+        background: #e5ccf3;
+      }
+
+      .drum.active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px var(--text);
+        background: #c8a2e0;
+      }
+
+      .drum-keyboard-hint {
+        margin-top: 2rem;
+        color: #8A6FD1;
+      }
+
+      .drum-keyboard-hint kbd {
+        display: inline-block;
+        padding: 0.3em 0.6em;
+        font-size: 0.9em;
+        color: var(--text);
+        background: #f3e9fa;
+        border: 1px solid #dabae9;
+        border-radius: 4px;
+        margin: 0 0.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+    <header>
+      <div class="brand-bar" style="width:100%; display:flex; align-items:center; justify-content:space-between;">
+        <a class="brand-name" href="index.html" aria-label="Home">DKMY-ART</a>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button id="home-btn" class="theme-toggle" aria-label="Go home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+              <path d="M5 21.5V12h14v9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </button>
+          <button id="sound-thunder" class="sound-btn theme-toggle" data-sound="thunder" aria-label="Thunder" title="Thunder">⛈️</button>
+          <button id="sound-cat" class="sound-btn theme-toggle" data-sound="cat" aria-label="Cat meows" title="Cat meows">🐱</button>
+          <button id="sound-rain" class="sound-btn theme-toggle" data-sound="rain" aria-label="Rain" title="Rain">🌧️</button>
+          <button id="sound-birds" class="sound-btn theme-toggle" data-sound="birds" aria-label="Forest birds" title="Forest birds">🐦</button>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: none;">
+              <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/>
+              <path d="M12 1v6m0 12v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M1 12h6m12 0h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: block;">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="piano-page">
+      <h1>Mini piano &amp; scales</h1>
+      <p class="lead">
+        Choose a key signature. The left white key is always the tonic; the octave runs chromatically from
+        there so the layout matches that key. Scale tones are marked; click, tap, or use the
+        computer keyboard to play.
+      </p>
+      <p class="keyboard-hint" id="keyboard-hint">
+        <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd> <kbd>H</kbd> <kbd>J</kbd>
+        <kbd>K</kbd> → tonic through leading tone &nbsp;·&nbsp; <kbd>L</kbd> → tonic, next octave
+        &nbsp;·&nbsp; <kbd>Insert</kbd> → semitone above tonic
+      </p>
+
+      <div class="controls">
+        <label for="scale-select">
+          <span>Key</span>
+          <select id="scale-select" aria-describedby="scale-hint"></select>
+        </label>
+      </div>
+      <p id="scale-hint" class="scale-hint" aria-live="polite"></p>
+
+      <div class="piano-wrap">
+        <div
+          class="piano-keys"
+          id="piano-keys"
+          role="group"
+          aria-label="One chromatic octave from the scale tonic"
+        ></div>
+      </div>
+
+      <section class="drum-section">
+        <h2>Mini Drum Kit</h2>
+        <p>Click or press the keys to play your custom sounds!</p>
+
+        <div class="drum-kit">
+          <button class="drum" data-key="S">Snare</button>
+          <button class="drum" data-key="D">Hi-hat</button>
+          <button class="drum" data-key="H">Crash</button>
+        </div>
+
+        <p class="drum-keyboard-hint">
+          <kbd>S</kbd> <kbd>D</kbd> <kbd>H</kbd>
+        </p>
+      </section>
+    </main>
+
+    <footer>© <span id="year"></span> DKMY ART — Crafted for creators.</footer>
+    </div>
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      const body = document.body;
+
+      themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        themeToggle.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+      });
+
+      // Home button
+      document.getElementById('home-btn').addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+
+      // Set year
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // Music Maker JavaScript
+      (function () {
+        "use strict";
+
+        // Audio context and synthesizer
+        let audioContext = null;
+        let masterGain = null;
+
+        function initAudio() {
+          if (audioContext) return audioContext;
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          masterGain = audioContext.createGain();
+          masterGain.gain.value = 0.6;
+          masterGain.connect(audioContext.destination);
+          return audioContext;
+        }
+
+        function playNote(frequency, duration = 0.5) {
+          const ctx = initAudio();
+          const oscillator = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          oscillator.frequency.value = frequency;
+          oscillator.type = 'sine';
+
+          gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+          oscillator.connect(gainNode);
+          gainNode.connect(masterGain);
+
+          oscillator.start(ctx.currentTime);
+          oscillator.stop(ctx.currentTime + duration);
+        }
+
+        // Musical scales and notes
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const SCALE_OPTIONS = {
+          'D Major': { root: 2, intervals: [0, 2, 4, 5, 7, 9, 11] }, // D
+          'A Minor': { root: 9, intervals: [0, 2, 3, 5, 7, 8, 10] }, // A
+          'E Minor': { root: 4, intervals: [0, 2, 3, 5, 7, 8, 10] }, // E
+          'F Major': { root: 5, intervals: [0, 2, 4, 5, 7, 9, 11] }, // F
+          'G Major': { root: 7, intervals: [0, 2, 4, 5, 7, 9, 11] }, // G
+          'B Minor': { root: 11, intervals: [0, 2, 3, 5, 7, 8, 10] }, // B
+          'C Minor': { root: 0, intervals: [0, 2, 3, 5, 7, 8, 10] }  // C
+        };
+
+        // DOM elements
+        const scaleSelect = document.getElementById('scale-select');
+        const scaleHint = document.getElementById('scale-hint');
+        const pianoKeys = document.getElementById('piano-keys');
+        const keyboardHint = document.getElementById('keyboard-hint');
+
+        let currentScale = 'D Major';
+        let currentRoot = 2; // D
+        let activeKeys = new Set();
+
+        // Create piano keys
+        function createPianoKeys() {
+          pianoKeys.innerHTML = '';
+
+          // White keys (7 keys for one octave)
+          const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+          whiteKeys.forEach((note, index) => {
+            const key = document.createElement('button');
+            key.className = 'key-white';
+            key.setAttribute('data-note', index);
+            key.setAttribute('aria-label', `${note} key`);
+            key.innerHTML = `<span class="key-label">${note}</span>`;
+            pianoKeys.appendChild(key);
+          });
+
+          // Black keys (5 keys)
+          const blackKeyPositions = [0, 1, 3, 4, 5]; // Positions between white keys
+          blackKeyPositions.forEach((pos, index) => {
+            const key = document.createElement('button');
+            key.className = `key-black kb-${index}`;
+            key.setAttribute('data-note', pos + 1); // C#=1, D#=3, F#=6, G#=8, A#=10
+            const noteNames = ['C#', 'D#', 'F#', 'G#', 'A#'];
+            key.setAttribute('aria-label', `${noteNames[index]} key`);
+            key.innerHTML = `<span class="key-label">${noteNames[index]}</span>`;
+            pianoKeys.appendChild(key);
+          });
+        }
+
+        // Update scale display
+        function updateScaleDisplay() {
+          const scaleData = SCALE_OPTIONS[currentScale];
+          const rootNote = NOTES[scaleData.root];
+
+          // Update hint
+          scaleHint.textContent = `${currentScale}: ${scaleData.intervals.map(interval => NOTES[(scaleData.root + interval) % 12]).join(' ')}`;
+
+          // Mark keys in scale
+          document.querySelectorAll('.key-white, .key-black').forEach(key => {
+            const noteIndex = parseInt(key.getAttribute('data-note'));
+            const isInScale = scaleData.intervals.includes(noteIndex);
+            key.classList.toggle('in-scale', isInScale);
+          });
+        }
+
+        // Play note
+        function playKeyNote(keyElement) {
+          const noteIndex = parseInt(keyElement.getAttribute('data-note'));
+          const scaleData = SCALE_OPTIONS[currentScale];
+          const frequency = 261.63 * Math.pow(2, (scaleData.root + noteIndex) / 12); // C4 = 261.63 Hz
+          playNote(frequency);
+
+          // Visual feedback
+          keyElement.classList.add('is-active');
+          setTimeout(() => keyElement.classList.remove('is-active'), 150);
+        }
+
+        // Keyboard mapping
+        const keyMap = {
+          'KeyS': 0, // C
+          'KeyD': 2, // D
+          'KeyF': 4, // E
+          'KeyG': 5, // F
+          'KeyH': 7, // G
+          'KeyJ': 9, // A
+          'KeyK': 11, // B
+          'KeyL': 12, // C (next octave)
+          'Insert': 1  // C#
+        };
+
+        // Event listeners
+        function setupEventListeners() {
+          // Scale selection
+          scaleSelect.addEventListener('change', (e) => {
+            currentScale = e.target.value;
+            updateScaleDisplay();
+          });
+
+          // Piano key clicks
+          pianoKeys.addEventListener('click', (e) => {
+            const key = e.target.closest('.key-white, .key-black');
+            if (key) {
+              playKeyNote(key);
+            }
+          });
+
+          // Keyboard events
+          document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'SELECT') return; // Don't interfere with select dropdown
+
+            const noteIndex = keyMap[e.code];
+            if (noteIndex !== undefined && !activeKeys.has(e.code)) {
+              activeKeys.add(e.code);
+              const scaleData = SCALE_OPTIONS[currentScale];
+              const frequency = 261.63 * Math.pow(2, (scaleData.root + noteIndex) / 12);
+              playNote(frequency);
+
+              // Visual feedback for corresponding piano key
+              const keyElement = document.querySelector(`[data-note="${noteIndex}"]`);
+              if (keyElement) {
+                keyElement.classList.add('is-active');
+              }
+            }
+          });
+
+          document.addEventListener('keyup', (e) => {
+            if (activeKeys.has(e.code)) {
+              activeKeys.delete(e.code);
+              const noteIndex = keyMap[e.code];
+              const keyElement = document.querySelector(`[data-note="${noteIndex}"]`);
+              if (keyElement) {
+                keyElement.classList.remove('is-active');
+              }
+            }
+          });
+        }
+
+        // Initialize
+        function init() {
+          // Populate scale select
+          Object.keys(SCALE_OPTIONS).forEach(scaleName => {
+            const option = document.createElement('option');
+            option.value = scaleName;
+            option.textContent = scaleName;
+            scaleSelect.appendChild(option);
+          });
+          scaleSelect.value = currentScale;
+
+          createPianoKeys();
+          updateScaleDisplay();
+          setupEventListeners();
+        }
+
+        // Start when page loads
+        init();
+      })();
+
+// Ambient sound controls using Web Audio API and audio files
+    const activeSounds = new Map(); // Track active sound sources
+    
+    // Pre-load audio files
+    const audioFiles = {
+      ocean: null, // Keep synthesized
+      thunder: 'juliush-heavy-rain-nature-sounds-8186.mp3',
+      cat: 'geoffharvey-fat-cat-374614.mp3',
+      rain: 'liecio-calming-rain-257596.mp3',
+      birds: 'musicword-bird-flight-236928.mp3'
+    };
+
+    let audioCtx = null;
+
+    function getOrCreateAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function stopSound(soundType) {
+      if (activeSounds.has(soundType)) {
+        const soundData = activeSounds.get(soundType);
+        
+        if (soundData.isAudioElement) {
+          // For audio file
+          soundData.audio.pause();
+          soundData.audio.currentTime = 0;
+        } else {
+          // For Web Audio API
+          soundData.oscillators.forEach(osc => osc.stop());
+          soundData.noises.forEach(noise => noise.stop());
+        }
+        activeSounds.delete(soundType);
+      }
+    }
+
+    function generateOcean() {
+      const ctx = getOrCreateAudioContext();
+      const oscillators = [];
+      const noises = [];
+
+      // Create wave-like effect with low frequency noise
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 200;
+      filter.Q.value = 0.3;
+
+      const gain = ctx.createGain();
+      gain.gain.value = 0.15;
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+      noises.push(noise);
+
+      return { oscillators, noises, isAudioElement: false };
+    }
+
+    function playAudioFile(soundType) {
+      // Create a fresh audio instance for each playback
+      const audio = new Audio(audioFiles[soundType]);
+      if (!audio) return null;
+
+      audio.loop = true;
+      audio.currentTime = 0;
+      audio.play().catch(err => console.log('Audio play error:', err));
+
+      return { audio, isAudioElement: true };
+    }
+
+    function generateThunder() {
+      return playAudioFile('thunder');
+    }
+
+    function generateCat() {
+      return playAudioFile('cat');
+    }
+
+    function generateRain() {
+      return playAudioFile('rain');
+    }
+
+    function generateBirds() {
+      return playAudioFile('birds');
+      }
+
+      const soundGenerators = {
+        ocean: generateOcean,
+        thunder: generateThunder,
+        cat: generateCat,
+        rain: generateRain,
+        birds: generateBirds
+      };
+
+      const soundButtons = document.querySelectorAll('.sound-btn');
+
+      soundButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const soundType = button.dataset.sound;
+
+          if (activeSounds.has(soundType)) {
+            // Stop the sound
+            stopSound(soundType);
+            button.classList.remove('active');
+          } else {
+            // Stop any other playing sounds
+            activeSounds.forEach((_, type) => {
+              stopSound(type);
+              const otherBtn = document.querySelector(`[data-sound="${type}"]`);
+              if (otherBtn) otherBtn.classList.remove('active');
+            });
+
+            // Play the new sound
+            const generator = soundGenerators[soundType];
+            if (generator) {
+              const soundData = generator();
+              activeSounds.set(soundType, soundData);
+              button.classList.add('active');
+            }
+          }
+        });
+      });
+
+      // Drum Kit Synthesizer
+      const drumAudioContext = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+
+
+      function playSnare() {
+        const now = drumAudioContext.currentTime;
+        const noise = drumAudioContext.createBufferSource();
+        const buffer = drumAudioContext.createBuffer(1, drumAudioContext.sampleRate * 0.2, drumAudioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+        
+        noise.buffer = buffer;
+        const gain = drumAudioContext.createGain();
+        noise.connect(gain);
+        gain.connect(drumAudioContext.destination);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        
+        noise.start(now);
+        noise.stop(now + 0.2);
+      }
+
+      function playHiHat() {
+        const now = drumAudioContext.currentTime;
+        const noise = drumAudioContext.createBufferSource();
+        const buffer = drumAudioContext.createBuffer(1, drumAudioContext.sampleRate * 0.1, drumAudioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+        
+        noise.buffer = buffer;
+        const filter = drumAudioContext.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 8000;
+        
+        const gain = drumAudioContext.createGain();
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(drumAudioContext.destination);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        
+        noise.start(now);
+        noise.stop(now + 0.1);
+      }
+
+      function playCrash() {
+        const now = drumAudioContext.currentTime;
+        const noise = drumAudioContext.createBufferSource();
+        const buffer = drumAudioContext.createBuffer(1, drumAudioContext.sampleRate * 0.8, drumAudioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+        
+        noise.buffer = buffer;
+        const filter = drumAudioContext.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 5000;
+        
+        const gain = drumAudioContext.createGain();
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(drumAudioContext.destination);
+        gain.gain.setValueAtTime(0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        
+        noise.start(now);
+        noise.stop(now + 0.8);
+      }
+
+      const drumSounds = {
+        S: playSnare,
+        D: playHiHat,
+        H: playCrash
+      };
+
+      function playDrum(key) {
+        const soundFunc = drumSounds[key.toUpperCase()];
+        if (!soundFunc) return;
+
+        soundFunc();
+
+        // Visual feedback
+        const btn = document.querySelector(`.drum[data-key="${key.toUpperCase()}"]`);
+        if (btn) {
+          btn.classList.add('active');
+          setTimeout(() => btn.classList.remove('active'), 100);
+        }
+      }
+
+      // Drum button click listeners
+      document.querySelectorAll('.drum').forEach(btn => {
+        btn.addEventListener('click', () => playDrum(btn.dataset.key));
+      });
+
+      // Drum keyboard listeners
+      document.addEventListener('keydown', e => {
+        const key = e.key.toUpperCase();
+        if (drumSounds[key]) {
+          playDrum(key);
+          e.preventDefault();
+        }
+      });
+    </script>
+
+  <!-- Ambient Sound Audio Elements -->
+  <audio id="sound-ocean" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/ocean-wave-1.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/ocean-wave-1.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-thunder" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/thunder-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/thunder-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-cat" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/cat-meow-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/cat-meow-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-rain" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/rain-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/rain-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-birds" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/birds-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/birds-01.wav" type="audio/wav">
+  </audio>
+  </body>
+</html>

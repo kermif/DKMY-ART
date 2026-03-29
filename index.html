@@ -7,17 +7,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
   <link id="result-font-link" href="" rel="stylesheet" />
   <style>
     :root {
-      --bg: #9E99CC; /* requested background color */
-      --surface: #181c28;
-      --surface2: #222838;
-      --text: #e8eaf0;
-      --muted: #8b92a8;
-      --accent: #7c9cff;
+      /* LIGHT THEME (default) — matches provided mock */
+      --bg: #F6ECD9; /* warm cream */
+  --surface: #dabae9;
+  --surface2: #dabae9;
+  --text: #6E3E99; /* deep purple */
+      --muted: #B9A6D1; /* soft lavender */
+      --accent: #C19AFB;
+      --brand-text: #8A6FD1;
       --radius: 14px;
       --font-ui: "DM Sans", system-ui, sans-serif;
+
+      /* hero/panel/button variables */
+      --brand-bar-gradient: linear-gradient(90deg,#C7E1FF,#F6C9DF);
+      --title-color: #6E3E99;
+      --subtitle-color: #B7A1D6;
+  --panel-color: #dabae9; /* updated box color */
+      --panel-radius: 56px;
+      --btn-bg: linear-gradient(180deg,#F8D6B7,#F4C9A8);
+      --btn-text: #E07A4C;
+      --btn-shadow: rgba(224,122,76,0.14);
+      --panel-inset-shadow: rgba(0,0,0,0.06);
     }
 
     /* dark mode overrides */
@@ -28,7 +42,19 @@
       --text: #e8eaf0;
       --muted: #8b92a8;
       --accent: #7c9cff;
+      --brand-bar-gradient: linear-gradient(90deg,#6f63a8,#7b63a8);
+      --brand-text: #6b8cde;
+      --title-color: #ffdfe9;
+      --subtitle-color: #c6bfe0;
+      --panel-color: #9080b3;
+      --btn-bg: #cdc5dd;
+      --btn-text: #1f1d3b;
+      --btn-shadow: rgba(0,0,0,0.06);
+      --panel-inset-shadow: rgba(0,0,0,0.06);
     }
+
+  /* Ensure the home icon (SVG stroke uses currentColor) uses the desired brand color in dark mode */
+  .dark-mode .brand-bar #home-btn { color: #6b8cde; }
 
     * {
       box-sizing: border-box;
@@ -38,34 +64,51 @@
       margin: 0;
       min-height: 100vh;
       font-family: var(--font-ui);
-      background: radial-gradient(1200px 800px at 20% -10%, #1a2340 0%, transparent 55%),
-        radial-gradient(900px 600px at 100% 50%, #251838 0%, transparent 50%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
       line-height: 1.5;
     }
 
     .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 2rem 1.25rem 4rem;
+      max-width: none;
+      width: 100%;
+      margin: 0;
+      padding: 28px 28px 48px;
+      min-height: 100vh;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 2rem;
+      text-align: left;
+      margin-bottom: 0.5rem;
+      padding-left: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: transparent;
+      padding-top: 8px;
     }
 
     .theme-toggle {
-      position: absolute;
-      right: 1.25rem;
-      top: 1.25rem;
-      border-radius: 10px;
-      padding: 0.45rem 0.6rem;
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
+      border-radius: 12px;
+      padding: 0.55rem 0.9rem;
+      background: rgba(255,255,255,0.7);
+      color: var(--title-color);
       cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 2px solid rgba(0,0,0,0.06);
+      display:inline-flex; align-items:center; justify-content:center;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+      font-size: 1.25rem; /* larger icon */
+      line-height: 1;
+    }
+    .theme-toggle:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+    .theme-toggle:focus { outline: 3px solid rgba(124,156,255,0.18); outline-offset: 3px; }
+
+    .sound-btn.active {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     header h1 {
@@ -81,13 +124,66 @@
       font-size: 0.95rem;
     }
 
+    /* brand bar and hero styles (home layout) */
+    .brand-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      background: var(--brand-bar-gradient);
+      padding: 10px 18px; border-radius: 6px; margin-bottom: 18px;
+      color: var(--brand-text); font-weight:700; letter-spacing:0.06em;
+    }
+    .brand-bar .brand-name { font-family: 'Fredoka One', system-ui, sans-serif; font-size:1.05rem; color:var(--brand-text) }
+    .brand-bar .brand-right { opacity:0.95; }
+
+    .home-hero {
+      background: transparent;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 36px 22px;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+  .home-hero .hero-title { font-family: 'Fredoka One', system-ui, sans-serif; font-size: 48px; text-align:center; color:var(--title-color); margin:8px 0 6px; }
+  .home-hero .hero-sub { text-align:center; color:var(--subtitle-color); margin-bottom: 26px; font-weight:600 }
+
+    /* decorative stars */
+    .hero-star { position:absolute; width:22px; height:22px; opacity:0.95 }
+    .hero-star.s1 { left:8%; top:18%; }
+    .hero-star.s2 { left:22%; top:32%; opacity:0.45; filter:blur(1px);}
+    .hero-star.s3 { right:14%; top:22%; }
+
+    .hero-panel {
+      width: min(820px, 86%);
+      margin: 0 auto;
+      background: var(--panel-color);
+      border-radius: var(--panel-radius);
+      padding: 44px 36px;
+      display:flex; flex-direction:column; gap:28px; align-items:center;
+      box-shadow: inset -8px -8px 0 var(--panel-inset-shadow);
+    }
+
+    .hero-btn {
+      width: 68%; max-width:420px; padding: 18px 28px; border-radius: 40px; font-size:28px; text-align:center;
+      background: var(--btn-bg); color: var(--btn-text); border: none; cursor:pointer; box-shadow: 0 8px 0 var(--btn-shadow), inset -6px -4px 0 rgba(255,255,255,0.25);
+      font-family: 'DM Sans', system-ui, sans-serif; font-weight:600;
+    }
+
+  /* Default (light mode): make all hero buttons the same yellow as Start Quiz */
+  .hero-btn.secondary { background: var(--btn-bg); color: var(--btn-text); opacity:1 }
+
+  /* In dark mode ensure secondary buttons keep the same Start Quiz text color */
+  .dark-mode .hero-btn.secondary { background: var(--btn-bg); color: var(--btn-text); opacity:0.95 }
+
+
     .card {
       background: linear-gradient(145deg, var(--surface) 0%, var(--surface2) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: var(--radius);
       padding: 1.5rem 1.35rem;
       margin-bottom: 1.25rem;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      /* remove heavy outer shadow for a flatter, full-bleed look */
+      box-shadow: none;
     }
 
     .card h2 {
@@ -123,6 +219,71 @@
       box-shadow: 0 12px 32px rgba(91, 124, 255, 0.45);
     }
 
+    /* Quiz "Next" button color override: light and dark variants */
+    .card button[data-next].btn-primary {
+      background: #f8d2b3; /* light mode requested */
+      color: #1b1b1b;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .dark-mode .card button[data-next].btn-primary {
+      background: #cdc5dd; /* dark mode requested */
+      color: #000000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    }
+
+    /* Quiz "Back" button color override: light and dark variants */
+    .card button[data-back].btn-back {
+      background: #f2c0ed; /* light mode (assumed corrected hex) */
+      color: #1b1b1b;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+    }
+
+    .dark-mode .card button[data-back].btn-back {
+      background: #9477b1; /* dark mode requested (updated) */
+      color: #08110d;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+    }
+
+    /* Hover and active (pressed) states to simulate button click */
+    .card button[data-next].btn-primary:hover,
+    .card button[data-back].btn-back:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.03);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+    }
+
+    .card button[data-next].btn-primary:active,
+    .card button[data-back].btn-back:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08) inset, 0 2px 6px rgba(0,0,0,0.18);
+    }
+
+    /* Dark-mode: make all button text use the start-quiz text color */
+    .dark-mode button { color: var(--btn-text); }
+
+    /* Dark-mode choice boxes (cards/panels) background */
+    .dark-mode .card,
+    .dark-mode .hero-panel { background: #3d5786; }
+
+    /* Dark-mode Next button: background and text color override */
+    .dark-mode .card button[data-next].btn-primary {
+      background: #cdc5dd; /* dark mode requested */
+      color: #000000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    }
+
+    /* Make Generate results match Next button backgrounds and behavior */
+  #generate-btn { background: #f8d2b3; color: #1b1b1b; }
+    .dark-mode #generate-btn { background: #cdc5dd; color: #000000; }
+    #generate-btn:hover { transform: translateY(-2px); filter: brightness(1.03); box-shadow: 0 10px 28px rgba(0,0,0,0.14); }
+    #generate-btn:active { transform: translateY(1px); box-shadow: 0 4px 8px rgba(0,0,0,0.08) inset, 0 2px 6px rgba(0,0,0,0.18); }
+
+    /* Artist choice cards: make labels larger and boxes more rectangular */
+    #artist-chips .chip { display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; border-radius: 10px; min-width: 200px; }
+    #artist-chips .chip .artist-thumb img { width: 160px; height: 100px; border-radius: 8px; }
+    #artist-chips .chip div { font-size: 1.05rem; font-weight: 700; }
+
     .btn-ghost {
       background: rgba(255, 255, 255, 0.08);
       color: var(--text);
@@ -144,10 +305,22 @@
     }
 
     .btn-note {
-      background: rgba(124, 156, 255, 0.2);
+      background: #F4DBFF; /* randomize button */
       color: var(--accent);
       border: 1px solid rgba(124, 156, 255, 0.35);
     }
+    /* Results page background */
+    #results { background: #F4DBFF; padding: 28px; }
+
+    /* Darker description text inside boxes (replace lighter purple with darker) */
+    .card h2 { color: #795bb4; }
+
+    /* Dark mode: change quiz titles and description text to #1f1d3b */
+    .dark-mode .card h2,
+    .dark-mode .card p { color: #1f1d3b; }
+
+    /* Music box color: use same as randomize button */
+    .music-box { background: #F4DBFF; }
 
     .hidden {
       display: none !important;
@@ -175,12 +348,6 @@
     .segmented {
       display:flex; gap:0.5rem; align-items:center;
     }
-
-  .tick-row { display:flex; gap:6px; align-items:center; justify-content:space-between; margin-top:6px; }
-
-  /* small dot for fractional ticks; taller dashed lines for hour ticks */
-  .tick { width:6px; height:6px; background: rgba(255,255,255,0.12); border-radius:50%; }
-  .tick.hour { width:2px; height:28px; background: transparent; border-left:2px dashed rgba(124,156,255,0.45); border-radius:0; }
 
     input[type="color"] {
       width: 72px;
@@ -233,6 +400,10 @@
       box-shadow: 0 0 0 1px rgba(124, 156, 255, 0.3);
     }
 
+    .dark-mode .chip {
+      color: #ffffff;
+    }
+
     .emoji-row {
       display: flex;
       flex-wrap: wrap;
@@ -265,22 +436,28 @@
       box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.25);
     }
 
-    .slider-wrap {
-      margin-top: 0.5rem;
-    }
-
-    .slider-wrap label {
-      display: flex;
-      justify-content: space-between;
+    .duration-btn {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(124, 156, 255, 0.3);
+      background: rgba(124, 156, 255, 0.08);
+      color: var(--text);
       font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 0.35rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
     }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-      height: 8px;
+    .duration-btn:hover {
+      border-color: rgba(124, 156, 255, 0.6);
+      background: rgba(124, 156, 255, 0.15);
+    }
+
+    .duration-btn.selected {
+      background: rgba(124, 156, 255, 0.3);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(124, 156, 255, 0.25);
+      color: #fff;
     }
 
     .nav-quiz {
@@ -300,6 +477,30 @@
 
     #results {
       margin-top: 0.5rem;
+    }
+
+    .dark-mode #results {
+      background: #101219;
+    }
+
+    .dark-mode #results .card {
+      background: #9080b3;
+    }
+
+    .dark-mode #results .output-block {
+      background: #cdc5dd;
+      border: 1px solid #cdc5dd;
+    }
+
+    .dark-mode #results .output-block h3,
+    .dark-mode #results .output-block p,
+    .dark-mode #results h2,
+    .dark-mode #results span {
+      color: #000000;
+    }
+
+    .dark-mode #results .swatch {
+      color: #000000;
     }
 
     .palette-row {
@@ -369,7 +570,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: var(--muted);
+      color: var(--title-color);
     }
 
     .output-block p,
@@ -430,30 +631,91 @@
       text-align: center;
       color: var(--muted);
       font-size: 0.8rem;
-      margin-top: 2rem;
+      margin-top: 1rem;
+      padding-bottom: 28px;
     }
   </style>
 </head>
 <body>
+  <!-- Ambient Sound Audio Elements -->
+  <audio id="sound-ocean" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/ocean-wave-1.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/ocean-wave-1.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-thunder" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/thunder-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/thunder-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-cat" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/cat-meow-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/cat-meow-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-rain" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/rain-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/rain-01.wav" type="audio/wav">
+  </audio>
+  <audio id="sound-birds" preload="none" loop>
+    <source src="https://www.soundjay.com/misc/sounds/birds-01.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/misc/sounds/birds-01.wav" type="audio/wav">
+  </audio>
+
   <div class="wrap">
     <header>
-      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
-      <h1>DKMY ART</h1>
-      <p>Turn mood, color, and vibe into a palette, prompt, and mini soundtrack map.</p>
+      <div class="brand-bar" style="width:100%; display:flex; align-items:center; justify-content:space-between;">
+          <a class="brand-name" href="index.html" aria-label="Home">DKMY-ART</a>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button id="home-btn" class="theme-toggle" aria-label="Go home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <path d="M5 21.5V12h14v9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </svg>
+      </button>
+
+      <!-- Ambient Sound Buttons -->
+      <div class="sound-controls" style="display:flex; align-items:center; gap:6px;">
+        <button id="sound-thunder" class="sound-btn theme-toggle" data-sound="thunder" aria-label="Thunder" title="Thunder">⛈️</button>
+        <button id="sound-cat" class="sound-btn theme-toggle" data-sound="cat" aria-label="Cat meows" title="Cat meows">🐱</button>
+        <button id="sound-rain" class="sound-btn theme-toggle" data-sound="rain" aria-label="Rain" title="Rain">🌧️</button>
+        <button id="sound-birds" class="sound-btn theme-toggle" data-sound="birds" aria-label="Forest birds" title="Forest birds">🐦</button>
+      </div>
+
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: none;">
+          <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/>
+          <path d="M12 1v6m0 12v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M1 12h6m12 0h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: block;">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+        </div>
     </header>
 
-    <section id="intro" class="card">
-      <p style="color: var(--muted); margin-bottom: 1.5rem">
-        Answer a few inputs — get a color palette, art prompt, challenge, font pick, and music key with a quick listen.
-      </p>
-      
-      <button type="button" class="btn btn-primary" id="start-btn">Start the quiz</button>
+    <section id="intro" class="home-hero">
+      <!-- brand bar moved to header -->
+      <h1 class="hero-title">CREATIVE FINDER</h1>
+      <div class="hero-sub">Customized Art and Music Ideas</div>
+
+      <img class="hero-star s1" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23FFE6A3' d='M12 2l2.1 5.6L20 10l-5 3.6L15.9 20 12 16.8 8.1 20 9 13.6 4 10l5.9-2.4L12 2z'/></svg>" alt="star"/>
+      <img class="hero-star s2" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23D8C6FF' d='M12 2l2.1 5.6L20 10l-5 3.6L15.9 20 12 16.8 8.1 20 9 13.6 4 10l5.9-2.4L12 2z'/></svg>" alt="star"/>
+      <img class="hero-star s3" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23FFDDEE' d='M12 2l2.1 5.6L20 10l-5 3.6L15.9 20 12 16.8 8.1 20 9 13.6 4 10l5.9-2.4L12 2z'/></svg>" alt="star"/>
+
+      <div class="hero-panel">
+        <button id="start-btn" class="hero-btn">Start Quiz</button>
+  <button type="button" class="hero-btn secondary" id="gallery-btn" onclick="window.location.href='collagegallery.html'">Collage/Gallery</button>
+  <button type="button" class="hero-btn secondary" id="music-maker-btn" onclick="window.location.href='music-maker.html'" aria-label="Open Music Maker">Music Maker</button>
+  <button type="button" class="hero-btn secondary" id="about-btn" onclick="window.location.href='about-us.html'">About Us</button>
+      </div>
     </section>
 
     <div id="quiz-flow" class="hidden">
       <div class="card" data-step="0">
         <h2>1 · Your anchor color</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">
           Pick a color; we’ll build a small palette around it.
         </p>
         <div class="row-picker" style="width:100%; align-items:flex-start;">
@@ -467,8 +729,7 @@
             </div>
           </div>
           <div style="min-width:180px; display:flex; flex-direction:column; gap:0.5rem;">
-            <!-- dominant-first option removed; palette will show equal-width swatches -->
-            <div style="color:var(--muted); font-size:0.85rem">Palette will show 5 equal swatches</div>
+            <!-- dominant-first option removed -->
           </div>
         </div>
         <div class="nav-quiz">
@@ -478,7 +739,7 @@
 
       <div class="card hidden" data-step="1">
         <h2>2 · Weather mood</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Pick the weather that matches the vibe — each has an icon.</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Pick the weather that matches the vibe — each has an icon.</p>
   <div class="chip-group" id="weather-chips" role="radiogroup" aria-label="Weather options"></div>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
@@ -488,9 +749,9 @@
 
       <div class="card hidden" data-step="2">
         <h2>3 · Pick mood emojis</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Pick one or more emojis that capture your mood (multi-select).</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Pick one or more emojis that capture your mood (multi-select).</p>
   <div class="emoji-row" id="emoji-row" role="group" aria-label="Mood emojis"></div>
-        <p style="color:var(--muted); font-size:0.85rem; margin-top:0.5rem">Selected emojis will be combined in the prompt.</p>
+        <p style="color: var(--title-color); font-size:0.85rem; margin-top:0.5rem">Selected emojis will be combined in the prompt.</p>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
           <button type="button" class="btn btn-primary" data-next>Next</button>
@@ -499,7 +760,7 @@
 
       <div class="card hidden" data-step="3">
         <h2>4 · Choose a character</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Pick a short descriptor for a character to include (or skip).</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Pick a short descriptor for a character to include (or skip).</p>
   <div class="chip-group" id="character-chips" role="radiogroup" aria-label="Character options"></div>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
@@ -509,7 +770,7 @@
 
       <div class="card hidden" data-step="4">
         <h2>5 · Choose an artist</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Pick an artist influence to nudge style and palette.</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Pick an artist influence to nudge style and palette.</p>
         <div style="display:flex; gap:0.75rem; flex-direction:column;">
           <div class="chip-group" id="artist-chips" role="radiogroup" aria-label="Artist options"></div>
         </div>
@@ -521,7 +782,7 @@
 
       <div class="card hidden" data-step="5">
         <h2>6 · Your work environment</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Where will you work? This changes prompt framing.</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Where will you work? This changes prompt framing.</p>
   <div class="chip-group" id="env-chips" role="radiogroup" aria-label="Work environment options"></div>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
@@ -531,9 +792,9 @@
 
       <div class="card hidden" data-step="6">
         <h2>7 · Pick media</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem">Choose one or more mediums you'll use.</p>
+        <p style="color: var(--title-color); font-size: 0.9rem; margin: 0 0 1rem">Choose one or more mediums you'll use.</p>
   <div class="chip-group" id="media-chips" role="group" aria-label="Media options"></div>
-  <p style="color:var(--muted); font-size:0.85rem; margin-top:0.5rem">Special mediums: gold leaf, sculpture, found leaves, installation, encaustic</p>
+  <p style="color: var(--title-color); font-size:0.85rem; margin-top:0.5rem">Special mediums: gold leaf, sculpture, found leaves, installation, encaustic</p>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
           <button type="button" class="btn btn-primary" data-next>Next</button>
@@ -542,14 +803,19 @@
 
       <div class="card hidden" data-step="7">
         <h2>8 · How long is your session?</h2>
-        <div class="slider-wrap">
-          <label>
-            <span>Time box</span>
-            <span id="duration-label">~5 min</span>
-          </label>
-          <input type="range" id="duration-slider" min="0" max="100" value="35" />
-          <div id="duration-ticks" class="tick-row" aria-hidden="true"></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 1.5rem 0;">
+          <button type="button" class="duration-btn" data-minutes="5">5 min</button>
+          <button type="button" class="duration-btn" data-minutes="10">10 min</button>
+          <button type="button" class="duration-btn" data-minutes="30">30 min</button>
+          <button type="button" class="duration-btn" data-minutes="60">1 hour</button>
+          <button type="button" class="duration-btn" data-minutes="90">1.5 hours</button>
+          <button type="button" class="duration-btn" data-minutes="120">2 hours</button>
+          <button type="button" class="duration-btn" data-minutes="180">3 hours</button>
+          <button type="button" class="duration-btn" data-minutes="240">4 hours</button>
+          <button type="button" class="duration-btn" data-minutes="300">5 hours</button>
+          <button type="button" class="duration-btn" data-minutes="360">6 hours</button>
         </div>
+        <div style="text-align: center; margin: 1rem 0; color: var(--text);">Selected: <span id="duration-label">30 min</span></div>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
           <button type="button" class="btn btn-primary" data-next>Next</button>
@@ -558,7 +824,7 @@
 
       <div class="card hidden" data-step="8">
         <h2>9 · Pick your vibe</h2>
-        <p style="color: var(--muted); margin:0 0 0.75rem">Select a vibe to bias style and palette.</p>
+        <p style="color: var(--title-color); margin:0 0 0.75rem">Select a vibe to bias style and palette.</p>
         <div class="chip-group" id="vibe-chips"></div>
         <div class="nav-quiz">
           <button type="button" class="btn btn-back" data-back>Back</button>
@@ -566,7 +832,7 @@
         </div>
       </div>
 
-      
+     
     </div>
 
     <section id="results" class="hidden">
@@ -590,11 +856,15 @@
 
         <div class="output-block">
           <h3>Font</h3>
-          <p id="font-name-out" style="color: var(--muted); font-size: 0.9rem"></p>
+          <p id="font-name-out" style="color: var(--title-color); font-size: 0.9rem"></p>
           <p class="font-preview" id="font-preview-out">The quick brown fox jumps over the lazy dog.</p>
+          <div style="margin-top:1rem; margin-bottom:1rem;">
+            <p style="color: var(--title-color); font-size: 0.85rem; margin: 0 0 0.75rem">Pick a different font:</p>
+            <div class="chip-group" id="font-chips" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+          </div>
           <div style="margin-top:0.5rem; display:flex; gap:0.5rem; align-items:center;">
             <button class="btn btn-small" id="apply-font-btn">Apply site font</button>
-            <span style="color:var(--muted); font-size:0.85rem">Change whole website to this font?</span>
+            <span style="color: var(--title-color); font-size:0.85rem">Change whole website to this font?</span>
           </div>
         </div>
 
@@ -672,6 +942,18 @@
       'on a train': '🚆',
       'outdoors by a lake': '🏞️',
       rooftop: '🌆'
+    };
+    const MEDIA_EMOJIS = {
+      "digital": "💻",
+      "ink": "🖊️",
+      "oil": "🎨",
+      "watercolor": "🌊",
+      "collage": "✂️",
+      "charcoal": "⚫",
+      "gold leaf": "✨",
+      "sculpture": "🗿",
+      "found leaves": "🍃",
+      "encaustic": "🔥"
     };
     const MEDIA = ["digital","ink","oil","watercolor","collage","charcoal","gold leaf","sculpture","found leaves","encaustic"];
     const state = {
@@ -904,6 +1186,50 @@
       return "Restrict yourself to analogous colors plus one surprise complement.";
     }
 
+    const FONTS = [
+      { name: "Lora", family: '"Lora", serif', query: "Lora:wght@400;700" },
+      { name: "The Seasons", family: '"The Seasons", serif', query: "The+Seasons" },
+      { name: "moontime", family: '"moontime", cursive', query: "moontime" },
+      { name: "Comic Sans", family: '"Comic Sans MS", cursive', query: null },
+      { name: "Shrikhand", family: '"Shrikhand", serif', query: "Shrikhand" },
+      { name: "Agrandir", family: '"Agrandir", sans-serif', query: "Agrandir" },
+      { name: "BEBAS NEUE", family: '"Bebas Neue", sans-serif', query: "Bebas+Neue" },
+      { name: "HORIZON", family: '"HORIZON", sans-serif', query: "HORIZON" },
+      { name: "Etna Sans Serif", family: '"Etna Sans Serif", sans-serif', query: "Etna+Sans+Serif" },
+      { name: "Fredoka", family: '"Fredoka", sans-serif', query: "Fredoka:wght@400;700" },
+      { name: "CINZEL DECORATIVE", family: '"Cinzel Decorative", serif', query: "Cinzel+Decorative" },
+      { name: "CINZEL", family: '"Cinzel", serif', query: "Cinzel:wght@400;700" },
+      { name: "Cormorant Garamond", family: '"Cormorant Garamond", serif', query: "Cormorant+Garamond:wght@400;700" },
+      { name: "Lilita One", family: '"Lilita One", serif', query: "Lilita+One" },
+      { name: "COPPERPLATE GOTHIC 29 BC", family: '"Copperplate Gothic", sans-serif', query: null },
+      { name: "Playfair Display", family: '"Playfair Display", serif', query: "Playfair+Display:wght@400;700" },
+      { name: "Telegraf", family: '"Telegraf", sans-serif', query: "Telegraf" },
+      { name: "Abril Fatface", family: '"Abril Fatface", serif', query: "Abril+Fatface" },
+      { name: "Bodoni FLF", family: '"Bodoni FLF", serif', query: null },
+      { name: "NORWESTER", family: '"NORWESTER", sans-serif', query: null },
+      { name: "Bukhari Script", family: '"Bukhari Script", cursive', query: "Bukhari+Script" },
+      { name: "Canva Student Font", family: '"Canva Student Font", sans-serif', query: null },
+      { name: "HK MODULAR", family: '"HK MODULAR", sans-serif', query: null },
+      { name: "Biski", family: '"Biski", serif', query: "Biski" },
+      { name: "Ansing", family: '"Ansing", sans-serif', query: "Ansing" },
+      { name: "Barriecito", family: '"Barriecito", serif', query: "Barriecito" },
+      { name: "Moja", family: '"Moja", serif', query: "Moja" },
+      { name: "ALTA", family: '"ALTA", sans-serif', query: "ALTA" },
+      { name: "Arvo", family: '"Arvo", serif', query: "Arvo:wght@400;700" },
+      { name: "Blaka", family: '"Blaka", serif', query: "Blaka" },
+      { name: "Brick Sans", family: '"Brick Sans", sans-serif', query: "Brick+Sans" },
+      { name: "Oswald", family: '"Oswald", sans-serif', query: "Oswald:wght@400;700" },
+      { name: "Slopes", family: '"Slopes", serif', query: "Slopes" },
+      { name: "Aprila", family: '"Aprila", serif', query: "Aprila" },
+      { name: "Fraunces", family: '"Fraunces", serif', query: "Fraunces:wght@400;700" },
+      { name: "Libre Baskerville", family: '"Libre Baskerville", serif', query: "Libre+Baskerville:wght@400;700" },
+      { name: "Spectral", family: '"Spectral", serif', query: "Spectral:wght@400;600" },
+      { name: "Quicksand", family: '"Quicksand", sans-serif', query: "Quicksand:wght@400;600" },
+      { name: "Outfit", family: '"Outfit", sans-serif', query: "Outfit:wght@400;700" },
+      { name: "Space Grotesk", family: '"Space Grotesk", sans-serif', query: "Space+Grotesk:wght@400;700" },
+      { name: "Figtree", family: '"Figtree", sans-serif', query: "Figtree:wght@400;700" },
+    ];
+
     const FONT_MAP = {
       calm: { name: "Fraunces", family: '"Fraunces", serif', query: "Fraunces:wght@400;700" },
       cloudy: { name: "Libre Baskerville", family: '"Libre Baskerville", serif', query: "Libre+Baskerville:wght@400;700" },
@@ -952,10 +1278,6 @@
       return NOTE_FREQ[root] || NOTE_FREQ.C;
     }
 
-    let audioCtx = null;
-
-    
-
     function pianoSearchUrl(root, mode) {
       const q = encodeURIComponent(`${root} ${mode} scale piano`);
       return `https://www.youtube.com/results?search_query=${q}`;
@@ -1001,7 +1323,7 @@
   const eRow = document.getElementById("emoji-row");
       // small notice element for emoji limit
       let emojiNotice = document.createElement('div');
-      emojiNotice.style.color = 'var(--muted)';
+      emojiNotice.style.color = 'var(--title-color)';
       emojiNotice.style.fontSize = '0.85rem';
       emojiNotice.style.marginTop = '0.45rem';
       eRow.parentNode.insertBefore(emojiNotice, eRow.nextSibling);
@@ -1122,7 +1444,7 @@
         const b = document.createElement("button");
         b.type = "button";
         b.className = "chip";
-        b.textContent = m;
+        b.textContent = (MEDIA_EMOJIS[m] || "") + " " + m;
         b.dataset.id = m;
         b.addEventListener("click", () => {
           // multi-select media
@@ -1144,18 +1466,33 @@
       });
     }
 
-    // theme toggle in header (moon/sun icon)
+    // theme toggle in header (moon/sun icon) with persistence
     const themeBtn = document.getElementById('theme-toggle');
+    const homeBtn = document.getElementById('home-btn');
     function updateThemeIcon() {
+      if (!themeBtn) return;
+      const sunIcon = themeBtn.querySelector('.sun-icon');
+      const moonIcon = themeBtn.querySelector('.moon-icon');
       const isDark = document.documentElement.classList.contains('dark-mode');
-      themeBtn.textContent = isDark ? '☀️' : '🌙';
+      if (sunIcon && moonIcon) {
+        sunIcon.style.display = isDark ? 'block' : 'none';
+        moonIcon.style.display = isDark ? 'none' : 'block';
+      }
       themeBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
     }
-    themeBtn.addEventListener('click', ()=>{
-      document.documentElement.classList.toggle('dark-mode');
-      updateThemeIcon();
-    });
+    // initialize from localStorage
+    const savedTheme = localStorage.getItem('dkmy-theme-dark');
+    if (savedTheme === 'true') document.documentElement.classList.add('dark-mode');
+    if (savedTheme === 'false') document.documentElement.classList.remove('dark-mode');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', ()=>{
+        const isNowDark = document.documentElement.classList.toggle('dark-mode');
+        localStorage.setItem('dkmy-theme-dark', isNowDark ? 'true' : 'false');
+        updateThemeIcon();
+      });
+    }
     updateThemeIcon();
+    if (homeBtn) homeBtn.addEventListener('click', ()=>{ window.location.href = 'index.html'; });
 
     // sync hex input and color picker
     const colorPicker = document.getElementById('color-picker');
@@ -1169,97 +1506,26 @@
 
     // dominant-first option removed; no JS handler needed
 
-    // ------------------ Duration ticks and mapping ------------------
-    const durationSlider = document.getElementById('duration-slider');
-    const ticksContainer = document.getElementById('duration-ticks');
-
-  // build time options: start fine-grained (5-min steps) up to 60 min,
-  // then 15-min steps to 3h, then hourly up to 12h
-  const TIME_OPTIONS = [];
-  for (let m = 5; m <= 60; m += 5) TIME_OPTIONS.push(m);
-  for (let m = 75; m <= 180; m += 15) TIME_OPTIONS.push(m);
-  for (let h = 4; h <= 12; h++) TIME_OPTIONS.push(h * 60);
-
-    function buildTicks() {
-      ticksContainer.innerHTML = '';
-      const total = TIME_OPTIONS.length;
-      TIME_OPTIONS.forEach((mins, i) => {
-        const tick = document.createElement('div');
-        tick.className = 'tick' + ((mins % 60) === 0 ? ' hour' : '');
-        // position via flex: we'll stretch them evenly
-        tick.title = mins >= 60 ? `${mins/60} hr` : `${mins} min`;
-        ticksContainer.appendChild(tick);
+    // ------------------ Duration buttons handler ------------------
+    const durationButtons = document.querySelectorAll('.duration-btn');
+    // Initialize: mark button matching state.durationM as selected
+    durationButtons.forEach(btn => {
+      if (parseInt(btn.dataset.minutes) === state.durationM) {
+        btn.classList.add('selected');
+      }
+      btn.addEventListener('click', () => {
+        state.durationM = parseInt(btn.dataset.minutes);
+        // Update visual state
+        durationButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        // Update label
+        updateDurationLabel();
       });
-    }
-
-    function sliderIndexToValue(idx) {
-      return TIME_OPTIONS[Math.max(0, Math.min(TIME_OPTIONS.length-1, idx))];
-    }
-
-    function valueToSliderPercent(mins) {
-      const idx = TIME_OPTIONS.indexOf(mins);
-      if (idx < 0) return 0;
-      return Math.round((idx / (TIME_OPTIONS.length - 1)) * 100);
-    }
-
-    function snapSliderToNearest() {
-      const pct = Number(durationSlider.value);
-      const idx = Math.round((pct / 100) * (TIME_OPTIONS.length - 1));
-      const mins = sliderIndexToValue(idx);
-      state.durationM = mins;
-      durationSlider.value = valueToSliderPercent(mins);
-      document.getElementById('duration-label').textContent = durationPhrase(mins).short;
-    }
-
-    // build ticks and initialize slider
-    buildTicks();
-    // initialize position to default 30min
-    durationSlider.value = valueToSliderPercent(state.durationM);
-    document.getElementById('duration-label').textContent = durationPhrase(state.durationM).short;
-
-    // snapping on mouseup/touchend
-    durationSlider.addEventListener('change', snapSliderToNearest);
-    durationSlider.addEventListener('pointerup', snapSliderToNearest);
-    durationSlider.addEventListener('touchend', snapSliderToNearest);
-    durationSlider.addEventListener('keydown', (ev)=>{
-      const pct = Number(durationSlider.value);
-      const idx = Math.round((pct / 100) * (TIME_OPTIONS.length - 1));
-      if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') {
-        const nextIdx = Math.min(TIME_OPTIONS.length - 1, idx + 1);
-        const mins = sliderIndexToValue(nextIdx);
-        durationSlider.value = valueToSliderPercent(mins);
-        state.durationM = mins;
-        document.getElementById('duration-label').textContent = durationPhrase(mins).short;
-        ev.preventDefault();
-      }
-      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') {
-        const nextIdx = Math.max(0, idx - 1);
-        const mins = sliderIndexToValue(nextIdx);
-        durationSlider.value = valueToSliderPercent(mins);
-        state.durationM = mins;
-        document.getElementById('duration-label').textContent = durationPhrase(mins).short;
-        ev.preventDefault();
-      }
-      if (ev.key === 'Home') {
-        const mins = sliderIndexToValue(0);
-        durationSlider.value = valueToSliderPercent(mins);
-        state.durationM = mins; document.getElementById('duration-label').textContent = durationPhrase(mins).short; ev.preventDefault();
-      }
-      if (ev.key === 'End') {
-        const mins = sliderIndexToValue(TIME_OPTIONS.length - 1);
-        durationSlider.value = valueToSliderPercent(mins);
-        state.durationM = mins; document.getElementById('duration-label').textContent = durationPhrase(mins).short; ev.preventDefault();
-      }
     });
-    // while dragging, show nearest label but don't permanently set until change
-    durationSlider.addEventListener('input', ()=>{
-      const pct = Number(durationSlider.value);
-      const idx = Math.round((pct / 100) * (TIME_OPTIONS.length - 1));
-      const mins = sliderIndexToValue(idx);
-      document.getElementById('duration-label').textContent = durationPhrase(mins).short;
-    });
+    // Set initial label
+    updateDurationLabel();
 
-    
+   
 
     function showStep(i) {
       const cards = document.querySelectorAll("#quiz-flow .card");
@@ -1317,6 +1583,38 @@
       document.getElementById("font-name-out").textContent = font.name;
       const prev = document.getElementById("font-preview-out");
       prev.style.fontFamily = font.family;
+      
+      // Store current font selection for updates
+      let selectedFont = font;
+      
+      // Generate font selection buttons
+      const fontChipsContainer = document.getElementById("font-chips");
+      fontChipsContainer.innerHTML = "";
+      FONTS.forEach((f) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip" + (f.name === selectedFont.name ? " selected" : "");
+        btn.textContent = f.name;
+        btn.dataset.fontName = f.name;
+        btn.addEventListener("click", () => {
+          // Update selected font
+          selectedFont = f;
+          
+          // Update button states
+          document.querySelectorAll("#font-chips .chip").forEach(b => {
+            b.classList.remove("selected");
+          });
+          btn.classList.add("selected");
+          
+          // Update font link and preview
+          if (f.query) {
+            link.href = `https://fonts.googleapis.com/css2?family=${f.query}&display=swap`;
+          }
+          document.getElementById("font-name-out").textContent = f.name;
+          prev.style.fontFamily = f.family;
+        });
+        fontChipsContainer.appendChild(btn);
+      });
 
   const keyInfo = KEY_BY_MOOD[weather] || KEY_BY_MOOD.calm;
   document.getElementById("key-icon-out").textContent = keyInfo.icon === "♮" ? "♪" : keyInfo.icon;
@@ -1338,7 +1636,7 @@
       const matches = (musicArtistMap[keyInfo.mode] || []).filter((v,i,arr)=>arr.indexOf(v)===i);
       if (matches.length) {
         const matchOut = document.createElement('div');
-        matchOut.style.color = 'var(--muted)';
+        matchOut.style.color = 'var(--title-color)';
         matchOut.style.fontSize = '0.9rem';
         matchOut.style.marginTop = '0.6rem';
         matchOut.textContent = 'Artists that pair well with this music: ' + matches.join(', ');
@@ -1410,6 +1708,21 @@
       showStep(0);
     });
 
+    // simple Gallery/About handlers on the homepage
+    const galleryBtn = document.getElementById('gallery-btn');
+    if (galleryBtn) galleryBtn.addEventListener('click', ()=>{
+      window.location.href = 'collagegallery.html';
+    });
+    const musicBtn = document.getElementById('music-maker-btn');
+    if (musicBtn) musicBtn.addEventListener('click', ()=>{
+      // Navigate to the standalone music maker page in the same tab
+      window.location.href = 'music-maker.html';
+    });
+    const aboutBtn = document.getElementById('about-btn');
+    if (aboutBtn) aboutBtn.addEventListener('click', ()=>{
+      window.location.href = 'about-us.html';
+    });
+
     document.querySelectorAll("[data-next]").forEach((btn) => {
       btn.addEventListener("click", () => showStep(state.step + 1));
     });
@@ -1449,7 +1762,7 @@
       // append session length under prompt as a small note
       const promptBlock = document.getElementById('prompt-out');
       const note = document.createElement('div');
-      note.style.color = 'var(--muted)';
+      note.style.color = 'var(--title-color)';
       note.style.fontSize = '0.9rem';
       note.style.marginTop = '0.6rem';
       note.textContent = `Session length: ${dur.long}.`;
@@ -1479,6 +1792,139 @@
   });
   // restore saved font if present
   try { const saved = localStorage.getItem('dkmy-site-font'); if (saved) document.body.style.fontFamily = saved; } catch(e){}
+
+  // Ambient sound controls using Web Audio API and audio files
+  const activeSounds = new Map(); // Track active sound sources
+  
+  // Pre-load audio files
+  const audioFiles = {
+    ocean: null, // Keep synthesized
+    thunder: 'juliush-heavy-rain-nature-sounds-8186.mp3',
+    cat: 'geoffharvey-fat-cat-374614.mp3',
+    rain: 'liecio-calming-rain-257596.mp3',
+    birds: 'musicword-bird-flight-236928.mp3'
+  };
+
+  let audioCtx = null;
+
+  function getOrCreateAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function stopSound(soundType) {
+    if (activeSounds.has(soundType)) {
+      const soundData = activeSounds.get(soundType);
+      
+      if (soundData.isAudioElement) {
+        // For audio file
+        soundData.audio.pause();
+        soundData.audio.currentTime = 0;
+      } else {
+        // For Web Audio API
+        soundData.oscillators.forEach(osc => osc.stop());
+        soundData.noises.forEach(noise => noise.stop());
+      }
+      activeSounds.delete(soundType);
+    }
+  }
+
+  function generateOcean() {
+    const ctx = getOrCreateAudioContext();
+    const oscillators = [];
+    const noises = [];
+
+    // Create wave-like effect with low frequency noise
+    const noise = ctx.createBufferSource();
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+    noise.buffer = buffer;
+    noise.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 200;
+    filter.Q.value = 0.3;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.15;
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start();
+    noises.push(noise);
+
+    return { oscillators, noises, isAudioElement: false };
+  }
+
+  function playAudioFile(soundType) {
+    // Create a fresh audio instance for each playback
+    const audio = new Audio(audioFiles[soundType]);
+    if (!audio) return null;
+
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log('Audio play error:', err));
+
+    return { audio, isAudioElement: true };
+  }
+
+  function generateThunder() {
+    return playAudioFile('thunder');
+  }
+
+  function generateCat() {
+    return playAudioFile('cat');
+  }
+
+  function generateRain() {
+    return playAudioFile('rain');
+  }
+
+  function generateBirds() {
+    return playAudioFile('birds');
+  }
+
+  const soundGenerators = {
+    ocean: generateOcean,
+    thunder: generateThunder,
+    cat: generateCat,
+    rain: generateRain,
+    birds: generateBirds
+  };
+
+  const soundButtons = document.querySelectorAll('.sound-btn');
+
+  soundButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const soundType = button.dataset.sound;
+
+      if (activeSounds.has(soundType)) {
+        // Stop the sound
+        stopSound(soundType);
+        button.classList.remove('active');
+      } else {
+        // Stop any other playing sounds
+        activeSounds.forEach((_, type) => {
+          stopSound(type);
+          const otherBtn = document.querySelector(`[data-sound="${type}"]`);
+          if (otherBtn) otherBtn.classList.remove('active');
+        });
+
+        // Play the new sound
+        const generator = soundGenerators[soundType];
+        if (generator) {
+          const soundData = generator();
+          activeSounds.set(soundType, soundData);
+          button.classList.add('active');
+        }
+      }
+    });
+  });
   </script>
 </body>
 </html>
